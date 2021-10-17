@@ -11,7 +11,13 @@ module.exports = {
     createUser: async (reqBody) => {
         const { name, email, phone, pwd: password } = reqBody;
         const user = new User({ name, email, phone, password });
-        const newUser = await user.save();
-        return newUser;
+        try {
+            const newUser = await user.save();
+            console.log(newUser);
+            return { user: newUser };
+        } catch (err) {
+            console.error('error saving user:', err.message);
+            return { errors: err.errors };
+        }
     },
 };

@@ -44,8 +44,16 @@ module.exports = async (req, res) => {
     if (!validationResult.isValid) {
         res.status(400).json({ msg: validationResult.validationError });
     } else {
-        console.log('createUser:: log request body', req.body);
-        const newUser = await userService.createUser(req.body);
-        res.status(500).json(newUser);
+        const response = await userService.createUser(req.body);
+        if (response.errors) {
+            const errorField = Object.keys(response.errors)[0];
+            res.status(400).send({
+                msg: `User already exists with ${errorField} ${response.errors[errorField].value}`,
+            });
+        } else if (response.user) {
+            res.status(200).json(response.user);
+        } else {
+            res.status(500).json(response);
+        }
     }
 };
