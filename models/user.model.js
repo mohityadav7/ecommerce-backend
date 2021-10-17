@@ -1,3 +1,7 @@
+/**
+ * @description The schema definition for User
+ */
+
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({

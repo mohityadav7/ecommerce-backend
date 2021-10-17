@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('../models/User');
 
 const DB_URI = process.env.DB_URI;
 
