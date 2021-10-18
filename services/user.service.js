@@ -8,6 +8,12 @@
 const User = require('../models/user.model');
 
 module.exports = {
+    /**
+     * Insert new user in database
+     *
+     * @param {Object} reqBody reqBody must contain user details
+     * @returns {{errors: Object, user: Object}}
+     */
     createUser: async (reqBody) => {
         const { name, email, phone, pwd: password } = reqBody;
         const user = new User({ name, email, phone, password });
@@ -16,8 +22,58 @@ module.exports = {
             console.log(newUser);
             return { user: newUser };
         } catch (err) {
-            console.error('error saving user:', err.message);
             return { errors: err.errors };
+        }
+    },
+
+    /**
+     * Get all users
+     *
+     * @returns {{error: Object, users: Array<Object>}} List of all users
+     */
+    getAllUsers: async () => {
+        try {
+            const users = await User.find();
+            console.log(users);
+            return { users };
+        } catch (error) {
+            return { error };
+        }
+    },
+
+    /**
+     * Delete user by id and return the deleted user
+     *
+     * @param {Object} id
+     * @returns {{error: Object, user: Object}}
+     */
+    deleteUserById: async (id) => {
+        try {
+            const deletedUser = await User.findByIdAndDelete(id);
+            return { user: deletedUser };
+        } catch (error) {
+            return { error };
+        }
+    },
+
+    /**
+     * Update user by id
+     *
+     * @param {Object} id Id of user to be updated
+     * @param {Object} userData Validate data of user to used for updating user info
+     * @returns {{errors: Object, user: Object}}
+     */
+    updateUserById: async (id, userData) => {
+        try {
+            const updatedUser = await User.findByIdAndUpdate(id, userData, {
+                new: true,
+                runValidators: true,
+                context: 'query',
+            });
+            console.log(updatedUser);
+            return { user: updatedUser };
+        } catch (error) {
+            return { errors: error.errors };
         }
     },
 };

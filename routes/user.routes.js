@@ -10,7 +10,7 @@ const UserRouter = require('express').Router();
 
 UserRouter.post('/createUser', userController.createUser);
 UserRouter.get('/getAllUsers', userController.getAllUsers);
-UserRouter.put('/updateUser/:id', userController.updateUser);
-UserRouter.delete('/deleteUser/:id', userController.deleteUser);
+UserRouter.put('/updateUser/:id', userController.updateUserById);
+UserRouter.delete('/deleteUser/:id', userController.deleteUserById);
 
 module.exports = UserRouter;
