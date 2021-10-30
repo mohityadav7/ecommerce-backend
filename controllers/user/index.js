@@ -5,6 +5,7 @@
  */
 
 const userService = require('../../services/user.service');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
     createUser: require('./createUser'),
@@ -21,8 +22,22 @@ module.exports = {
 
     updateUserById: require('./updateUser'),
 
-    authenticateUser: (req, res) => {
-        res.status(500).send('todo');
+    login: async (req, res) => {
+        console.log('login:: req.body:', req.body);
+        const { email, password } = req.body;
+        if (!email || !password)
+            res.status(400).json({ msg: 'Please provide email and password.' });
+        const response = await userService.authenticateUser(email, password);
+        console.log('login:: response:', response);
+
+        if (response.error) {
+            res.status(500).json({ msg: 'Could not login.' });
+        } else {
+            const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+                expiresIn: '1 day',
+            });
+            res.status(200).json(token);
+        }
     },
 
     deleteUserById: async (req, res) => {
