@@ -6,6 +6,7 @@
 
 const userService = require('../../services/user.service');
 const jwt = require('jsonwebtoken');
+const config = require('../../config');
 
 module.exports = {
     createUser: require('./createUser'),
@@ -35,9 +36,9 @@ module.exports = {
         } else {
             const token = jwt.sign(
                 { id: response.user._id },
-                process.env.JWT_SECRET,
+                config.jwt.secret,
                 {
-                    expiresIn: '1 day',
+                    expiresIn: config.jwt.expiresIn,
                 }
             );
             const returnData = {
@@ -78,7 +79,7 @@ module.exports = {
         if (!token) {
             res.status(400).json({ msg: 'Please provide token.' });
         }
-        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+        jwt.verify(token, config.jwt.secret, async (err, decoded) => {
             if (err) {
                 return res
                     .status(200)
@@ -96,9 +97,9 @@ module.exports = {
                 } else {
                     const newToken = jwt.sign(
                         { id: response.user._id },
-                        process.env.JWT_SECRET,
+                        config.jwt.secret,
                         {
-                            expiresIn: '1 day',
+                            expiresIn: config.jwt.expiresIn,
                         }
                     );
                     const returnData = {

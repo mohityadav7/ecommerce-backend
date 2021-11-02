@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const routes = require('./routes/index.routes');
+const config = require('./config');
 
 const app = express(); // init app
-require('./config/db.config').connect(); // connect db
+require('./config').db.connect(); // connect db
 
 // middlewares
 app.use(express.json());
@@ -17,6 +18,6 @@ app.get('*', (req, res) => {
 });
 
 // start listening
-app.listen(process.env.PORT, () => {
-    console.log(`listening at http://localhost:${process.env.PORT}`);
+app.listen(config.port, () => {
+    console.log(`listening at http://localhost:${config.port}`);
 });
