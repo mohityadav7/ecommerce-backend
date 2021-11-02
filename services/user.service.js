@@ -101,4 +101,22 @@ module.exports = {
             return { error };
         }
     },
+
+    /**
+     * Authenticate user by id
+     *
+     * @param {string} id id of user
+     * @returns {error: Object, user: Object}
+     */
+    authenticateUserById: async (id) => {
+        try {
+            const user = await User.findById(id);
+            if (!user) {
+                return { error: 'Invalid user id' };
+            }
+            return { user };
+        } catch (error) {
+            return { error };
+        }
+    },
 };

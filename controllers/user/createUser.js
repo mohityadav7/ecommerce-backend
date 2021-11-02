@@ -51,7 +51,12 @@ module.exports = async (req, res) => {
                 msg: `User already exists with ${errorField} ${response.errors[errorField].value}`,
             });
         } else if (response.user) {
-            res.status(200).json(response.user);
+            const returnData = {
+                name: response.user.name,
+                email: response.user.email,
+                phone: response.user.phone,
+            };
+            res.status(200).json(returnData);
         } else {
             res.status(500).json(response);
         }

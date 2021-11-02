@@ -33,10 +33,20 @@ module.exports = {
         if (response.error) {
             res.status(500).json({ msg: 'Could not login.' });
         } else {
-            const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-                expiresIn: '1 day',
-            });
-            res.status(200).json(token);
+            const token = jwt.sign(
+                { id: response.user._id },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: '1 day',
+                }
+            );
+            const returnData = {
+                token,
+                name: response.user.name,
+                email: response.user.email,
+                phone: response.user.phone,
+            };
+            res.status(200).json(returnData);
         }
     },
 
@@ -53,7 +63,54 @@ module.exports = {
         } else if (!response.user) {
             res.status(410).json({ msg: `No user with id ${id}` });
         } else {
-            res.status(200).json(response.user);
+            const returnData = {
+                name: response.user.name,
+                email: response.user.email,
+                phone: response.user.phone,
+            };
+            res.status(200).json(returnData);
         }
+    },
+
+    authenticateUser: async (req, res) => {
+        const token = req.headers['authorization'];
+        console.log('authenticateUser:: token:', token);
+        if (!token) {
+            res.status(400).json({ msg: 'Please provide token.' });
+        }
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+            if (err) {
+                return res
+                    .status(200)
+                    .json({ authenticated: false, msg: 'Invalid token.' });
+            } else {
+                console.log('decoded', decoded);
+                const id = decoded.id;
+                const response = await userService.authenticateUserById(id);
+                console.log('authenticateUser:: response:', response);
+                if (response.error) {
+                    res.status(200).json({
+                        authenticated: false,
+                        msg: 'User not found.',
+                    });
+                } else {
+                    const newToken = jwt.sign(
+                        { id: response.user._id },
+                        process.env.JWT_SECRET,
+                        {
+                            expiresIn: '1 day',
+                        }
+                    );
+                    const returnData = {
+                        authenticated: true,
+                        name: response.user.name,
+                        email: response.user.email,
+                        phone: response.user.phone,
+                        token: newToken,
+                    };
+                    res.status(200).json(returnData);
+                }
+            }
+        });
     },
 };
