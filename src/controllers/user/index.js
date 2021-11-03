@@ -7,15 +7,16 @@
 const userService = require('../../services/user.service');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
+const errors = require('../../errors');
 
 module.exports = {
     createUser: require('./createUser'),
 
-    getAllUsers: async (req, res) => {
+    getAllUsers: async (req, res, next) => {
         const response = await userService.getAllUsers();
         console.log('getAllUsers:: response:', response);
         if (response.error) {
-            res.status(500).json({ msg: 'Could not get users.' });
+            next(new errors.InternalServerError('Could not get users.'));
         } else {
             res.status(200).json(response.users);
         }
@@ -23,16 +24,20 @@ module.exports = {
 
     updateUserById: require('./updateUser'),
 
-    login: async (req, res) => {
+    login: async (req, res, next) => {
         console.log('login:: req.body:', req.body);
         const { email, password } = req.body;
         if (!email || !password)
-            res.status(400).json({ msg: 'Please provide email and password.' });
+            next(
+                new errors.BadRequestError('Email and password are required.')
+            );
         const response = await userService.authenticateUser(email, password);
         console.log('login:: response:', response);
 
         if (response.error) {
-            res.status(500).json({ msg: 'Could not login.' });
+            next(
+                new errors.InternalServerError('Could not authenticate user.')
+            );
         } else {
             const token = jwt.sign(
                 { id: response.user._id },
@@ -51,18 +56,18 @@ module.exports = {
         }
     },
 
-    deleteUserById: async (req, res) => {
+    deleteUserById: async (req, res, next) => {
         const id = req.params.id;
         if (!id) {
-            res.status(400).send({ msg: 'Id not present in request params' });
+            next(new errors.BadRequestError('Id is required.'));
             return;
         }
         const response = await userService.deleteUserById(id);
         console.log('deleteUserById:: response:', response);
         if (response.error) {
-            res.status(400).json({ msg: `Invalid id ${id}` });
+            next(new errors.InternalServerError('Could not delete user.'));
         } else if (!response.user) {
-            res.status(410).json({ msg: `No user with id ${id}` });
+            next(new errors.NotFoundError('User not found.'));
         } else {
             const returnData = {
                 name: response.user.name,
@@ -73,11 +78,11 @@ module.exports = {
         }
     },
 
-    authenticateUser: async (req, res) => {
+    authenticateUser: async (req, res, next) => {
         const token = req.headers['authorization'];
         console.log('authenticateUser:: token:', token);
         if (!token) {
-            res.status(400).json({ msg: 'Please provide token.' });
+            next(new errors.UnauthorizedError('Token is required.'));
         }
         jwt.verify(token, config.jwt.secret, async (err, decoded) => {
             if (err) {

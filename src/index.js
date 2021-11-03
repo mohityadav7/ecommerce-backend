@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const routes = require('./routes');
 const config = require('./config');
+const errors = require('./errors');
 
 const app = express(); // init app
 config.db.connect(); // connect db
@@ -13,8 +14,10 @@ app.use(require('cors')());
 
 routes(app); // set up routes
 
-app.get('*', (req, res) => {
-    res.status(404).send('404');
+// error handling
+app.use((error, req, res, next) => {
+    console.log('error', error);
+    res.status(error.status || 500).send(error);
 });
 
 // start listening

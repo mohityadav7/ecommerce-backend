@@ -5,10 +5,11 @@
 
 const constants = require('../../constants');
 const userService = require('../../services/user.service');
+const errors = require('../../errors');
 
-module.exports = async (req, res) => {
+module.exports = async (req, res, next) => {
     if (!req.params.id) {
-        res.status(400).send({ msg: 'Id not present in request' });
+        next(new errors.BadRequestError('User id is required'));
         return;
     }
 
@@ -37,7 +38,7 @@ module.exports = async (req, res) => {
     }
 
     if (!validationResult.isValid) {
-        res.status(400).json({ msg: validationResult.validationError });
+        next(new errors.BadRequestError(validationResult.validationError));
     } else {
         const userData = {};
         if (name) userData.name = name;
@@ -49,9 +50,11 @@ module.exports = async (req, res) => {
 
         if (response.errors) {
             const errorField = Object.keys(response.errors)[0];
-            res.status(400).send({
-                msg: `User already exists with ${errorField} ${response.errors[errorField].value}`,
-            });
+            next(
+                new errors.BadRequestError(
+                    `User already exists with ${errorField} ${response.errors[errorField].value}`
+                )
+            );
         } else if (!response.user) {
             res.status(200).json({ msg: `No user with id ${id}` });
         } else {

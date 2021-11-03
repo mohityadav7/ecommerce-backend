@@ -1,11 +1,12 @@
 const userService = require('../../services/user.service');
 const constants = require('../../constants');
+const errors = require('../../errors');
 
 /**
  * Validate user input for sign up. Send status 400 if input is not valid.
  * Create user using user service if input is valid.
  */
-module.exports = async (req, res) => {
+module.exports = async (req, res, next) => {
     const { name, email, phone, pwd, pwd_confirm: pwdConfirm } = req.body;
     const reEmail = constants.regex.REGEX_EMAIL_VALIDATION;
     const rePhone = constants.regex.REGEX_PHONE_VALIDATIOIN;
@@ -42,23 +43,27 @@ module.exports = async (req, res) => {
     }
 
     if (!validationResult.isValid) {
-        res.status(400).json({ msg: validationResult.validationError });
+        // validation passed
+        next(new errors.BadRequestError(validationResult.validationError));
     } else {
+        // validation failed
         const response = await userService.createUser(req.body);
         if (response.errors) {
+            // user already exists
             const errorField = Object.keys(response.errors)[0];
-            res.status(400).send({
-                msg: `User already exists with ${errorField} ${response.errors[errorField].value}`,
-            });
-        } else if (response.user) {
+            next(
+                new errors.BadRequestError(
+                    `User already exists with ${errorField} ${response.errors[errorField].value}`
+                )
+            );
+        } else {
+            // user created
             const returnData = {
                 name: response.user.name,
                 email: response.user.email,
                 phone: response.user.phone,
             };
             res.status(200).json(returnData);
-        } else {
-            res.status(500).json(response);
         }
     }
 };
