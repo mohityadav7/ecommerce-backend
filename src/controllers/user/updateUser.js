@@ -6,6 +6,7 @@
 const constants = require('../../constants');
 const userService = require('../../services/user.service');
 const errors = require('../../errors');
+const logger = require('../../logger')('user.controller > updateUser');
 
 module.exports = async (req, res, next) => {
     if (!req.params.id) {
@@ -46,7 +47,7 @@ module.exports = async (req, res, next) => {
         if (phone) userData.phone = phone;
 
         const response = await userService.updateUserById(id, userData);
-        console.log('updateUserById:: response:', response);
+        logger.debug('updateUserById:: response:', response);
 
         if (response.errors) {
             const errorField = Object.keys(response.errors)[0];

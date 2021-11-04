@@ -8,13 +8,13 @@ const userService = require('../../services/user.service');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const errors = require('../../errors');
+const logger = require('../../logger')('user.controller');
 
 module.exports = {
     createUser: require('./createUser'),
 
     getAllUsers: async (req, res, next) => {
         const response = await userService.getAllUsers();
-        console.log('getAllUsers:: response:', response);
         if (response.error) {
             next(new errors.InternalServerError('Could not get users.'));
         } else {
@@ -25,14 +25,14 @@ module.exports = {
     updateUserById: require('./updateUser'),
 
     login: async (req, res, next) => {
-        console.log('login:: req.body:', req.body);
+        logger.debug('login:: req.body:', req.body);
         const { email, password } = req.body;
         if (!email || !password)
             next(
                 new errors.BadRequestError('Email and password are required.')
             );
         const response = await userService.authenticateUser(email, password);
-        console.log('login:: response:', response);
+        logger.debug('login:: response:', response);
 
         if (response.error) {
             next(
@@ -63,7 +63,7 @@ module.exports = {
             return;
         }
         const response = await userService.deleteUserById(id);
-        console.log('deleteUserById:: response:', response);
+        logger.debug('deleteUserById:: response:', response);
         if (response.error) {
             next(new errors.InternalServerError('Could not delete user.'));
         } else if (!response.user) {
@@ -80,7 +80,7 @@ module.exports = {
 
     authenticateUser: async (req, res, next) => {
         const token = req.headers['authorization'];
-        console.log('authenticateUser:: token:', token);
+        logger.debug('authenticateUser:: token:', token);
         if (!token) {
             next(new errors.UnauthorizedError('Token is required.'));
         }
@@ -90,10 +90,10 @@ module.exports = {
                     .status(200)
                     .json({ authenticated: false, msg: 'Invalid token.' });
             } else {
-                console.log('decoded', decoded);
+                logger.debug('decoded', decoded);
                 const id = decoded.id;
                 const response = await userService.authenticateUserById(id);
-                console.log('authenticateUser:: response:', response);
+                logger.debug('authenticateUser:: response:', response);
                 if (response.error) {
                     res.status(200).json({
                         authenticated: false,
