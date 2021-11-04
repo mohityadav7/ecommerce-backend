@@ -6,6 +6,7 @@
  */
 
 const bcrypt = require('bcrypt');
+const logger = require('../logger/index')('user.service');
 const User = require('../models/user.model');
 
 module.exports = {
@@ -21,7 +22,7 @@ module.exports = {
         const user = new User({ name, email, phone, password: passwordHash });
         try {
             const newUser = await user.save();
-            console.log(newUser);
+            logger.debug(`createUser:: newUser: ${newUser}`);
             return { user: newUser };
         } catch (err) {
             return { errors: err.errors };
@@ -36,7 +37,6 @@ module.exports = {
     getAllUsers: async () => {
         try {
             const users = await User.find();
-            console.log(users);
             return { users };
         } catch (error) {
             return { error };
@@ -72,7 +72,7 @@ module.exports = {
                 runValidators: true,
                 context: 'query',
             });
-            console.log(updatedUser);
+            logger.debug(updatedUser);
             return { user: updatedUser };
         } catch (error) {
             return { errors: error.errors };
