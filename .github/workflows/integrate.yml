@@ -8,7 +8,7 @@ jobs:
   test_pull_request:
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [16.13.0]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.node-version }}
