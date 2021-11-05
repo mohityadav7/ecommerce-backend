@@ -1,8 +1,9 @@
 const developmentLogger = require('./dev.logger');
 const productionLogger = require('./prod.logger');
+const config = require('../config');
 
 let logger = null;
-if (process.env.NODE_ENV === 'production') {
+if (config.env === 'production') {
     logger = productionLogger;
 } else {
     logger = developmentLogger;

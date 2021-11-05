@@ -7,4 +7,5 @@ module.exports = {
         secret: process.env.JWT_SECRET || 'secret',
         expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     },
+    env: process.env.NODE_ENV || 'development',
 };

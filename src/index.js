@@ -25,5 +25,5 @@ app.use((error, req, res, next) => {
 
 // start listening
 app.listen(config.port, () => {
-    logger.info(`listening at http://localhost:${config.port}`);
+    logger.info(`listening on port ${config.port}`);
 });
