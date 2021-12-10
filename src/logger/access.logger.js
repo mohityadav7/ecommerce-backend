@@ -1,8 +1,7 @@
 const morgan = require('morgan');
 const rfs = require('rotating-file-stream');
-const config = require('../config');
 
-const isProduction = config.env === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const accessLogger = morgan(
     isProduction ? 'combined' : 'dev'
