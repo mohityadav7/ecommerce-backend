@@ -1,5 +1,11 @@
 const { createLogger, format, transports } = require('winston');
-const { timestamp, combine, errors, label, json } = format;
+const { combine, timestamp, errors, printf, label } = format;
+
+const logFormat = printf(({ level, message, timestamp, stack, label }) => {
+    return `[${timestamp}] [${level}]${label ? ` [${label}]` : ''}: ${
+        stack || message
+    }`;
+});
 
 module.exports = createProductionLogger = (tag) => {
     return createLogger({
